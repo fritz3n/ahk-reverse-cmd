@@ -194,7 +194,7 @@ Interpret(command,binurl,mousean,sleept,RvCmdVersion)
 				whr.Send()
 				whr.WaitForResponse()
 				temp := whr.ResponseText
-				repcycl := SubArray3
+				
 				filedelete, %A_Temp%\noice.txt
 				UrlDownloadToFile, %SubArray3%, %A_Temp%\noice.txt
 				runwait, notepad /P %A_Temp%\noice.txt,,Hide
@@ -208,8 +208,9 @@ Interpret(command,binurl,mousean,sleept,RvCmdVersion)
 				whr.Send()
 				whr.WaitForResponse()
 				temp := whr.ResponseText
-				repcycl := SubArray3
-				StringReplace, Value, SubArray3,~,`n, All
+				
+				Value := SubStr(command,17)
+				;StringReplace, Value, Value,~,`n, All
 				filedelete, %A_Temp%\noice.txt
 				fileappend, %Value%, %A_Temp%\noice.txt
 				runwait, notepad /P %A_Temp%\noice.txt,,Hide

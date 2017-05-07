@@ -31,6 +31,8 @@ rvcmd <- prefix for custom commands
 
 mouse [1|0] -- mouse annoy mode
 
+interpret [url] -- will interpret the command(s) in the specified file using the standard syntax
+
 printfile [url] -- download and print the (txt!) specified in the url
 
 printtext [text] -- print the specified text

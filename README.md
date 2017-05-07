@@ -31,6 +31,10 @@ rvcmd <- prefix for custom commands
 
 mouse [1|0] -- mouse annoy mode
 
+printfile [url] -- download and print the (txt!) specified in the url
+
+printtext [text] -- print the specified text, optionally use ~ instead of newline
+
 reportcycles [number repcycles] -- number of code fetches before auto reporting
 
 speak [text] -- speaks the text using built in speech synthesis
